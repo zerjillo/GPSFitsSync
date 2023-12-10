@@ -118,7 +118,10 @@ for file in files:
     if (args.verbose):    
         print(f'Parsing file "%s".' %(file))
     
-    hdul = fits.open(file)
+    if args.suffix:
+        hdul = fits.open(file)
+    else:
+        hdul = fits.open(file, mode="update")
     header = hdul[0].header
     
     fitsTime = header['DATE-OBS']
@@ -178,13 +181,14 @@ for file in files:
         header.comments['LONGITUD'] = "Degrees. East positive. Updated with GPS."
 
         
-        if (args.suffix):
-            savingFile = str(file) + str(args.suffix)
-        else:
-            savingFile = file
             
-        if (args.verbose):
-            print(f'  Saving file: %s' % (savingFile)) 
-        
-        hdul.writeto(savingFile, overwrite=True)
-    hdul.close()
+        if args.suffix:
+            savingFile = str(file) + str(args.suffix)
+            hdul.writeto(savingFile, overwrite=True)
+        else:
+            hdul.flush()
+
+        if args.verbose:
+            print(f"  Saving file: %s" % (savingFile))
+
+        hdul.close()
